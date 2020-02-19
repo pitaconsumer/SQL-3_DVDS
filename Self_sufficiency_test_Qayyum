@@ -1,1 +1,152 @@
 
+Host: 142.93.121.174
+
+Username: dsbc_student
+
+Password: 7*.8G9QH21
+
+Port: 5432
+
+1) Write a query that allows you to inspect the schema of the naep table.
+SELECT *
+FROM naep;
+
+
+#If we are using Python, use: 
+Import the SQL ALchemy engine
+from sqlalchemy import create_engine
+sql = """
+    SELECT * 
+    FROM naep
+    """
+results = engine.execute(sql)
+engine.dispose()
+rows = results.fetchall()
+
+# print some results just to see what we got
+for row in rows:
+  print('There are {} many movies released for {} rating in the table'.format(row[1],row[0])) 
+  
+2) Write a query that returns the first 50 records of the naep table.
+
+SELECT *
+FROM naep
+LIMIT 50; 
+
+#If we are using Python, Import the SQL ALchemy engine use: 
+from sqlalchemy import create_engine
+
+sql = """
+    SELECT * 
+    FROM naep
+    """
+for row in rows[:50]:
+  print(row)
+  
+3) Write a query that returns summary statistics for avg_math_4_score by state. 
+Make sure to sort the results alphabetically by state name.
+
+SELECT *
+FROM naep
+GROUP BY state 
+ORDER BY state ASC;
+
+SELECT AVG(avg_math_4_score), MAX(avg_math_4_score), MIN(avg_math_4_score),state
+FROM naep
+GROUP BY state
+ORDER BY state ASC; 
+
+#OR individually: 
+SELECT AVG(avg_math_4_score)
+FROM naep
+GROUP BY state 
+ORDER BY state ASC;
+
+SELECT MAX(avg_math_4_score) 
+FROM naep
+GROUP BY state 
+ORDER BY state ASC;
+
+SELECT MIN(avg_math_4_score)
+FROM naep
+GROUP BY state A
+ORDER BY state ASC;
+
+#Using Python
+sql = '''
+    SELECT avg_math_4_score
+    FROM naep
+    GROUP BY state
+    '''
+    results = engine.execute(sql)
+engine.dispose()
+rows = results.fetchall()
+
+for row in rows:
+  print('There are {} many scores for {} rating in the table'.format(row[1],row[0])) 
+
+4) Write a query that alters the previous query so that it returns only the summary statistics for avg_math_4_score 
+by state with differences in max and min values that are greater than 30.
+
+#Need a subquery where the gap (difference) is between maximum AND minimum values are greater than 30.
+SELECT AVG(avg_math_4_score), MAX(avg_math_4_score), MIN(avg_math_4_score),state
+FROM naep
+   GROUP BY state
+   HAVING MAX(avg_math_4_score) - MIN(avg_math_4_score) >30;
+
+
+5)Write a query that returns a field called bottom_10_states that lists the states in the bottom 10 for avg_math_4_score 
+in the year 2000.
+
+SELECT MIN(avg_math_4_score), state AS bottom_10_states
+FROM naep
+WHERE year = 2000
+GROUP BY state
+ORDER BY MIN(avg_math_4_score) ASC
+LIMIT 10;
+
+
+****6)Write a query that calculates the average avg_math_4_score rounded to the nearest 2 decimal places over all states 
+in the year 2000. 
+
+#need to round for 2 decimal places
+
+SELECT ROUND(AVG(avg_math_4_score)::numeric,2)
+FROM naep
+	WHERE year =2000
+GROUP BY state;
+
+***7)Write a query that returns a field called below_average_states_y2000 that lists all states with an avg_math_4_score 
+less than the average over all states in the year 2000.
+
+SELECT
+FROM naep
+WHERE avg_math_4_score < AVG(avg
+
+WITH AVR_ST AS
+    (SELECT avg(avg_math_4_score) as AVG_STATES
+    FROM naep
+    WHERE year = '2000'
+    GROUP BY state)
+SELECT avg_math_4_score AS below_average_states_y2000, state
+FROM naep, AVR_ST
+WHERE avg_math_4_score < AVG_STATES;
+
+
+8)Write a query that returns a field called scores_missing_y2000 that lists any states with missing values in the 
+avg_math_4_score column of the naep data table for the year 2000.
+  
+SELECT state AS  scores_missing_y2000
+FROM naep
+WHERE year = '2000' AND avg_math_4_score IS NULL;
+
+9) Write a query that returns for the year 2000 the state, avg_math_4_score, and total_expenditure from the naep table 
+left outer joined with the finance table, using id as the key and ordered by total_expenditure greatest to least. 
+Be sure to round avg_math_4_score to the nearest 2 decimal places, and then filter out NULL avg_math_4_scores in order 
+to see any correlation more clearly.
+
+SELECT naep.state, ROUND(naep.avg_math_4_score, 2) as avg_math_4_score, finance.total_expenditure
+FROM naep
+LEFT OUTER JOIN finance ON naep.id = finance.id
+WHERE naep.year = '2000' AND avg_math_4_score IS NOT NULL
+ORDER BY finance.total_expenditure DESC;
